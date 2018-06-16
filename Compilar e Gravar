@@ -1,0 +1,17 @@
+// de asm para hex e outros
+avra [nome].asm
+
+
+// gravar
+
+CRYSTAL(20M)                                    
+sudo avrdude -p m328p -c usbasp -e -U lfuse:w:0x97:m -U hfuse:w:0xD9:m -U efuse:w:0xFF:m -U lock:w:0xFF:m -U flash:w:[nome].hex
+sudo avrdude -p m328p -c usbasp -e -U lfuse:w:0xCF:m -U hfuse:w:0xD9:m -U efuse:w:0xFF:m -U lock:w:0xFF:m -U flash:w:[nome].hex
+sudo avrdude -p m328p -c usbasp -e -U lfuse:w:0xFF:m -U hfuse:w:0xD9:m -U efuse:w:0xFF:m -U lock:w:0xFF:m -U flash:w:[nome].hex
+
+
+       											||
+INTERNO 8M										\/
+sudo avrdude -p m328p -c usbasp -e -U lfuse:w:0xE2:m -U hfuse:w:0xD9:m -U efuse:w:0xFF:m -U lock:w:0xFF:m -U flash:w:[nome].hex
+
+
