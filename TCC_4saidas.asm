@@ -7,7 +7,7 @@
 .def time3 = r19
 .def sum40 = r20
 .def dir   = r21
-
+.def flagint = r22
 .def flag40khz = R23
 .def pin40khz = r24
 
@@ -336,8 +336,9 @@ loop:
 ;////////////////////////////////////////// 40kHz MAKE ////////////////////////////////////////////
 TIM0_COMPA:
 	cli
-	;cpi sum40,0b00000101
-	;breq fim40khz
+	cpi sum40,0b00000101
+	breq fim40khz
+	
 	cpi flag40khz,0b00000000 ; compara flag com 0 
 	brne baixo ;se flag /= 0 vai para
 ;	rjmp cima  ; seta 1 no pind6
@@ -359,15 +360,58 @@ baixo:
 	sei
 	;RET
 	rjmp loop
-;fim40khz:
-;	cbi PORTD,6
-;	ldi flag40khz,0b00000000
-;	
-;	ldi temp,0b00000000    ;configura TCC0B    clk off			 pg 107
-;	sts TCCR0B,temp
-;	sei
-;	;RET
-;	rjmp loop
+fim40khz:
+	
+	cpi pin40khz,0b00000000
+	breq of40k
+	
+	ldi temp,0b00000000 ; reseta timer 1
+	;out TCNT0,temp		;|
+	sts TCNT1L,temp     ; -->zerar o tempo									
+	sts TCNT1H,temp		;|
+	ldi time3,0b00000000
+	
+of40k:	
+	
+	ldi pin40khz,0b00000000
+	out PORTC,pin40khz
+	ldi flag40khz,0b00000000
+	cpi flagint,0b00000000
+	breq loop
+	cpi flagint,0b00000001
+	brne calc
+	ldi flagint,0b00000010
+	rjmp loop
+	
+calc:
+	ldi temp,0b10000001 ; pausar timer 0 e 1
+	out GTCCR,temp
+	lds time1,TCNT1L    ; guarda valores de tempo
+	lds time2,TCNT1H 
+;	ldi temp,0b00000000 ;desativa int1
+;	out EIMSK,temp	
+	cbi PORTD,5 ; entrada T1
+	cbi PORTD,6 ; entrada T2
+	cbi PORTD,7 ; entrada T3
+	cbi PORTB,0 ; entrada T4
+	out PORTC,temp ;  seta 0 no pind2
+	
+;////////////////////////////////////////////// TRANSMICAO DOS DADOS //////////////////////////////////////////////////////	
+
+	ldi temp,0b00001000;TX on
+	sts UCSR0B, temp
+	sbi PORTD,2 ; configura max485 para enviar dados	
+	sei
+	
+	;ldi time1,0b01000110
+	;ldi time2,0b01000111
+	;ldi time3,0b01001000
+	rjmp TXdir
+	;ldi temp,0b00000000    ;configura TCC0B    clk off			 pg 107
+	;sts TCCR0B,temp
+	sei
+	;RET
+	rjmp loop
 
 ;/////////////////////////////////////////////// TIMER EXTRA //////////////////////////
 
@@ -381,46 +425,55 @@ timer1_ovf:
 
 int1_calc:
 	cli
-	inc temp
-	cpi temp, 0b00000001 
-	BREQ loop ; se = 1
+	ldi flagint,0b00000001
+;	cpi sum40,0b00000101
+;	brmi loop
+;	ldi temp,0b00000000 ; reseta timer 0
+;	out TCNT0,temp
+	rjmp loop
+	
+	
+;	inc temp
+;	cpi temp, 0b00000001 
+;	BREQ loop ; se = 1
  
 	
-	ldi temp,0b10000001 ; pausar timer 0 e 1
-	out GTCCR,temp
+;	ldi temp,0b10000001 ; pausar timer 0 e 1
+;	out GTCCR,temp
 
-	lds time1,TCNT1L    ; guarda valores de tempo
-	lds time2,TCNT1H 
+;	lds time1,TCNT1L    ; guarda valores de tempo
+;	lds time2,TCNT1H 
 	;ldi temp,0b00000000    
 	;sts TCCR1B,temp ;configura TCC1B    clk off	
 	;out TCCR0B,temp ;configura TCC0B    clk off	 
 
-	ldi temp,0b00000000 ;desativa int1
-	out EIMSK,temp
-
+;;;;;;
+;	ldi temp,0b00000000 ;desativa int1
+;	out EIMSK,temp
+;;;;;;
   
 	;inc time1
 	
-	out PORTC,temp ;  seta 0 no pind2
-	ldi flag40khz,0b00000000 ; zerra flag 40khz
+;	out PORTC,temp ;  seta 0 no pind2
+;	ldi flag40khz,0b00000000 ; zerra flag 40khz
 	
 	; zerra controles de direção
-	cbi PORTD,5 ; entrada T1
-	cbi PORTD,6 ; entrada T2
-	cbi PORTD,7 ; entrada T3
-	cbi PORTB,0 ; entrada T4
+;	cbi PORTD,5 ; entrada T1
+;	cbi PORTD,6 ; entrada T2
+;	cbi PORTD,7 ; entrada T3
+;	cbi PORTB,0 ; entrada T4
 
 ;////////////////////////////////////////////// TRANSMICAO DOS DADOS //////////////////////////////////////////////////////	
 
-	ldi temp,0b00001000;TX on
-	sts UCSR0B, temp
-	sbi PORTD,2 ; configura max485 para enviar dados	
-	sei
+;	ldi temp,0b00001000;TX on
+;	sts UCSR0B, temp
+;	sbi PORTD,2 ; configura max485 para enviar dados	
+;	sei
 	
 	;ldi time1,0b01000110
 	;ldi time2,0b01000111
 	;ldi time3,0b01001000
-	rjmp TXdir
+;	rjmp TXdir
 
 ; comando de direcao 
 TXdir:
