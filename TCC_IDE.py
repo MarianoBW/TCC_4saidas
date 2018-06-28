@@ -7,46 +7,53 @@ PARAM_ASCII='s'
 time.sleep(1.8)
 #while 1:
     #try:
-PARAM_ASCII='3'
+PARAM_ASCII='N'
 comport.write(PARAM_ASCII)
 dir_val=comport.read(1)
         #print '\nComando: %s' % (dir_val)
 
         #119+256*119+256*256*119
 tempo1=comport.read(1)
-#tempo2=comport.read(1)
-#tempo3=comport.read(1)
-#tempo1=ord(tempo1)
-#tempo2=ord(tempo2)
-#tempo3=ord(tempo3)
+tempo2=comport.read(1)
+tempo3=comport.read(1)
+tempo1=ord(tempo1)
+tempo2=ord(tempo2)
+tempo3=ord(tempo3)
         
 print '\nComando: %s' % (dir_val)
-print '\nt1: %s' % (tempo1)
+#print '\nt1: %s' % (tempo1)
 #print '\nt2: %s' % (tempo2)
 #print '\nt3: %s' % (tempo3)
-#tempod1=float((tempo1+256*tempo2+256*256*tempo3)/20000000.0)
-#print '\ntempo [ns]: %s' % (tempod1)
+tempod1=float((tempo1+256*tempo2+256*256*tempo3)/20000000.0)
+print '\ntempo 1 [s]: %s' % (tempod1)
 
-PARAM_ASCII='1'
+PARAM_ASCII='S'
 comport.write(PARAM_ASCII)
 dir_val=comport.read(1)
         #print '\nComando: %s' % (dir_val)
 
         #119+256*119+256*256*119
 tempo1=comport.read(1)
-#tempo2=comport.read(1)
-#tempo3=comport.read(1)
-#tempo1=ord(tempo1)
-#tempo2=ord(tempo2)
-#tempo3=ord(tempo3)
+tempo2=comport.read(1)
+tempo3=comport.read(1)
+tempo1=ord(tempo1)
+tempo2=ord(tempo2)
+tempo3=ord(tempo3)
         
 print '\nComando: %s' % (dir_val)
-print '\nt1: %s' % (tempo1)
+#print '\nt1: %s' % (tempo1)
 #print '\nt2: %s' % (tempo2)
 #print '\nt3: %s' % (tempo3)
-#tempod2=float((tempo1+256*tempo2+256*256*(tempo3+1))/20000001.0) #*50 + 1
+tempod2=float((tempo1+256*tempo2+256*256*(tempo3+4))/20000000.0) #*50 + 1
 #float(tempod2)
-#print '\ntempo [ns]: %s' % (tempod2)
+print '\ntempo 2 [s]: %s' % (tempod2)
+
+
+
+vel=((0.2/2)*((1/tempod1)-(1/tempod2)))
+print '\nVelocidade [m/s]: %s' % (vel)
+
+
 #tfim=tempod1-tempod2 # em ns
 #print '\ntempo final [ns]: %s' % (tfim)
         #vel=
