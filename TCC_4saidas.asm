@@ -7,7 +7,7 @@
 .def time3 = r19
 .def sum40 = r20
 .def dir   = r21
-
+.def temp2 = R25
 .def flag40khz = R23
 .def pin40khz = r24
 
@@ -161,7 +161,7 @@ RX:
 	rjmp RX
 	; guarda instrução recebida
 	lds dir, UDR0
-
+	ldi temp,0b00000000
 	; desativa comunicação RX
 	ldi temp,0b00000000
 	sts UCSR0B, temp
@@ -336,8 +336,8 @@ loop:
 ;////////////////////////////////////////// 40kHz MAKE ////////////////////////////////////////////
 TIM0_COMPA:
 	cli
-	;cpi sum40,0b00000101
-	;breq fim40khz
+;	cpi sum40,0b00011111
+;	breq fim40khz
 	cpi flag40khz,0b00000000 ; compara flag com 0 
 	brne baixo ;se flag /= 0 vai para
 ;	rjmp cima  ; seta 1 no pind6
@@ -360,13 +360,14 @@ baixo:
 	;RET
 	rjmp loop
 ;fim40khz:
-;	cbi PORTD,6
+	;cbi PORTD,6
+	
 ;	ldi flag40khz,0b00000000
-;	
-;	ldi temp,0b00000000    ;configura TCC0B    clk off			 pg 107
-;	sts TCCR0B,temp
+;	out PORTC,flag40khz
+	;ldi temp,0b00000000    ;configura TCC0B    clk off			 pg 107
+	;sts TCCR0B,temp
 ;	sei
-;	;RET
+	;RET
 ;	rjmp loop
 
 ;/////////////////////////////////////////////// TIMER EXTRA //////////////////////////
@@ -381,8 +382,8 @@ timer1_ovf:
 
 int1_calc:
 	cli
-	inc temp
-	cpi temp, 0b00000001 
+	inc temp2
+	cpi temp2, 0b00000001 
 	BREQ loop ; se = 1
  
 	

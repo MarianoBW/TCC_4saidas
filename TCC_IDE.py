@@ -193,11 +193,11 @@ tempod19=float((tempo1+256*tempo2+256*256*tempo3)/20000000.0)
 lista=[tempod11, tempod12, tempod13, tempod14, tempod15, tempod16, tempod17, tempod18, tempod19]
 menor = lista[0]
 for i in lista:
-    if i < menor:
+    if i > menor:
         menor = i
 
 
-tempod1=menor #(tempod11+tempod12+tempod13+tempod14+tempod15)/5
+tempod1=menor-0.00134 #(tempod11+tempod12+tempod13+tempod14+tempod15)/5
 print '\ntempo 1 [s]: %s' % (tempod1)
 #------------------------------------------------------------
 PARAM_ASCII='1'
@@ -374,10 +374,10 @@ tempod29=float((tempo1+256*tempo2+256*256*(tempo3))/20000000.0)
 lista=[tempod21, tempod22, tempod23, tempod24, tempod25, tempod26, tempod27, tempod28, tempod29]
 menor = lista[0]
 for i in lista:
-    if i < menor:
+    if i > menor:
         menor = i
         
-tempod2=menor #(tempod21+tempod22+tempod23+tempod24+tempod25)/5
+tempod2=menor-0.00081 #(tempod21+tempod22+tempod23+tempod24+tempod25)/5
 
 #float(tempod2)
 print '\ntempo 2 [s]: %s' % (tempod2)
@@ -389,8 +389,9 @@ else:
     vel=((0.23/2)*((1/tempod1)-(1/tempod2)))
     
 print '\nVelocidade [m/s]: %s' % (vel)
- 
- 
+velkmh=vel*3.6 
+print '\nVelocidade [Km/h]: %s' % (velkmh)
+
 #tfim=tempod1-tempod2 # em ns
 #print '\ntempo final [ns]: %s' % (tfim)
         #vel=
