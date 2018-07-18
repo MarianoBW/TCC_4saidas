@@ -383,8 +383,8 @@ timer1_ovf:
 int1_calc:
 	cli
 	inc temp2
-	cpi temp2, 0b00000001 
-	BREQ loop ; se = 1
+	cpi temp2, 0b00000101 
+	BRMI loop ; se > 5
  
 	
 	ldi temp,0b10000001 ; pausar timer 0 e 1
