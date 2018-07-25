@@ -1,7 +1,7 @@
 import time
 import serial
 #import division
-comport = serial.Serial('/dev/ttyUSB0', 9600)
+comport = serial.Serial('/dev/ttyUSB1', 9600)
 PARAM_CARACTER='t'
 PARAM_ASCII='s'
 time.sleep(1.8)
@@ -193,11 +193,11 @@ tempod19=float((tempo1+256*tempo2+256*256*tempo3)/20000000.0)
 lista=[tempod11, tempod12, tempod13, tempod14, tempod15, tempod16, tempod17, tempod18, tempod19]
 menor = lista[0]
 for i in lista:
-    if i > menor:
+    if i < menor:
         menor = i
 
 
-tempod1=menor-0.00134 #(tempod11+tempod12+tempod13+tempod14+tempod15)/5
+tempod1=menor-0.00058356 #-0.00026#9285 #(tempod11+tempod12+tempod13+tempod14+tempod15)/5
 print '\ntempo 1 [s]: %s' % (tempod1)
 #------------------------------------------------------------
 PARAM_ASCII='1'
@@ -374,10 +374,10 @@ tempod29=float((tempo1+256*tempo2+256*256*(tempo3))/20000000.0)
 lista=[tempod21, tempod22, tempod23, tempod24, tempod25, tempod26, tempod27, tempod28, tempod29]
 menor = lista[0]
 for i in lista:
-    if i > menor:
+    if i < menor:
         menor = i
         
-tempod2=menor-0.00081 #(tempod21+tempod22+tempod23+tempod24+tempod25)/5
+tempod2=menor-0.00038216 #(tempod21+tempod22+tempod23+tempod24+tempod25)/5
 
 #float(tempod2)
 print '\ntempo 2 [s]: %s' % (tempod2)

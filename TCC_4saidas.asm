@@ -31,19 +31,11 @@ start:
 
 	;desativa interrupções
 	cli
-
-	;configura CLK, desativa div8
-	;ldi temp,0b10000000
-	;sts CLKPR,temp
-	;ldi temp,0b00000000
-	;sts CLKPR,temp
-
-	;configura pinos de saida
 	
 	ldi temp,0b00001111 ; saidas para sinal de 40kHz, 1 para cada direcao
 	out DDRC,temp
 	
-	ldi temp,0b00000001 ;saida Direcao 3 (Oeste) + gravaçao e crystal
+	ldi temp,0b00000001 ;saida Direcao 4 (Oeste) + gravaçao e crystal
 	out DDRB,temp
 	
 	ldi temp,0b11100100 ;saida Direcao 3,2,1, (Sul,Leste,Norte, 00 ,max485 select Rx/Tx, 00)
@@ -61,38 +53,10 @@ start:
 		; 8 Bit, sem paridade e 1 bit de fim 
 	ldi temp, 0b00000110
 	sts UCSR0C, temp
-	
-;timer01 config
-	
-
-;bug repair atmega328p
-
-;	ldi temp,0b10000001 ; pausar timer 0 e 1
-;	out GTCCR,temp	
-;
-;	ldi temp,0b00000000
-;	out TCCR0A,temp
-;	out TCCR0B,temp
-;	ldi temp,0b00000010    ;configura TCC0A    CTC mode	
-;	out TCCR0A,temp
-;	ldi temp,0b00000001    ;configura TCC0B    clk/1 
-;	out TCCR0B,temp
-;	ldi temp,0b00000011    
-;	out OCR0A,temp
-;	ldi temp,0b00000000    
-;	sts TIMSK0,temp
-;	
-;	ldi temp,0b00000000 ; despausar timer 0 e 1
-;	out GTCCR,temp	
-;	nop
-;	nop
-;	nop
-
-
-
 
 	ldi temp,0b10000001 ; pausar timer 0 e 1
 	out GTCCR,temp
+	
 	;Timer0 40KHz
 	ldi temp,0b00000000
 	out TCCR0A,temp
@@ -150,21 +114,26 @@ start:
 	; vai para RX esperar comando				 
 	rjmp RX
 
-
-
 ;//////////////////////////////// COMUNICACAO ///////////////////////////////////////
 RX:
 	; aguarda receber instrução em RX
 	cbi PORTD,2 ;configura max485 para receber dados 
+	
 	lds temp, UCSR0A 
 	sbrs temp, RXC0	;verifica se foram recebidos dados
 	rjmp RX
+	
 	; guarda instrução recebida
 	lds dir, UDR0
 	ldi temp,0b00000000
+	
 	; desativa comunicação RX
 	ldi temp,0b00000000
 	sts UCSR0B, temp
+	
+	ldi time1,0b00000000
+	ldi time2,0b00000000
+	ldi time3,0b00000000
 	
 	; zera flag int1
 	ldi temp,0b00000010
@@ -200,8 +169,6 @@ erro:
 ;////////////////////////////////////// SELECAO SAIDA-ENTRADA ////////////////////////////////////
 DIR1:
 
-;	cli
-;	rjmp erro
 	ldi pin40khz,0b00000001  ; saida T1
 	
 	; ativa int1
@@ -216,27 +183,20 @@ DIR1:
 
 	ldi sum40, 0b00000000 ;zera contador de pulsos 
 	
-	;ldi temp,0b00000000 ; despausar timer 0 e 1
 	out GTCCR,temp
-	
-	;ldi temp,0b00000001    
-	;out TCCR0B,temp	;configura TCCR0B    clk/1									         
-	;sts TCCR1B,temp ;configura TCCR1B    clk/1
 
 ;	cbi PORTD,5 ; entrada T4
 	sbi PORTD,6 ; entrada T3 on
 ;	cbi PORTD,7 ; entrada T2
 ;	cbi PORTB,0 ; entrada T1
-	sei
+	sei	
+
 	rjmp loop
 
 DIR2:
-
-;	cli
 	
 	ldi pin40khz,0b00000010  ; saida T2
 	
-
 	; ativa int1
 	ldi temp,0b00000010 
 	out EIMSK,temp 
@@ -249,13 +209,8 @@ DIR2:
 	
 	ldi sum40, 0b00000000 ;zera contador de pulsos 
 	
-	;ldi temp,0b00000000 ; despausar timer 0 e 1
 	out GTCCR,temp
 	
-	;ldi temp,0b00000001    
-	;out TCCR0B,temp	;configura TCCR0B    clk/1									         
-	;sts TCCR1B,temp ;configura TCCR1B    clk/1
-
 	sbi PORTD,5 ; entrada T4 on
 ;	cbi PORTD,6 ; entrada T3
 ;	cbi PORTD,7 ; entrada T2
@@ -265,29 +220,19 @@ DIR2:
 
 DIR3:
 	
-;	cli
-	
 	ldi pin40khz,0b00000100  ; saida T3
 	
 	; ativa int1
 	ldi temp,0b00000010 
 	out EIMSK,temp 
-	
+
 	ldi temp,0b00000000 ; reseta timer 0 e 1
 	out TCNT0,temp		;|
 	sts TCNT1L,temp     ; -->zerar o tempo									
 	sts TCNT1H,temp		;|
 	ldi time3,0b00000000
 
-	ldi sum40, 0b00000000 ;zera contador de pulsos 
-
-	;ldi temp,0b00000000 ; despausar timer 0 e 1
 	out GTCCR,temp
-	
-	;ldi temp,0b00000001    
-	;out TCCR0B,temp	;configura TCCR0B    clk/1									         
-	;sts TCCR1B,temp ;configura TCCR1B    clk/1
-
 ;	cbi PORTD,5 ; entrada T4
 ;	cbi PORTD,6 ; entrada T3
 ;	cbi PORTD,7 ; entrada T2
@@ -298,8 +243,7 @@ DIR3:
 DIR4:
 
 	ldi pin40khz,0b00001000  ; saida T4
-;	cli
-
+	
 	; ativa int1
 	ldi temp,0b00000010 
 	out EIMSK,temp 
@@ -309,15 +253,8 @@ DIR4:
 	sts TCNT1L,temp     ; -->zerar o tempo									
 	sts TCNT1H,temp		;|
 	ldi time3,0b00000000
-
-	ldi sum40, 0b00000000 ;zera contador de pulsos 
-
-	;ldi temp,0b00000000 ; despausar timer 0 e 1
 	out GTCCR,temp
-	
-	;ldi temp,0b00000001    
-	;out TCCR0B,temp	;configura TCCR0B    clk/1									         
-	;sts TCCR1B,temp ;configura TCCR1B    clk/1
+
 
 ;	cbi PORTD,5 ; entrada T4
 ;	cbi PORTD,6 ; entrada T3
@@ -331,49 +268,29 @@ DIR4:
 loop:
 	sei
 	rjmp loop
-
-
+	
 ;////////////////////////////////////////// 40kHz MAKE ////////////////////////////////////////////
 TIM0_COMPA:
 	cli
-;	cpi sum40,0b00011111
-;	breq fim40khz
+
 	cpi flag40khz,0b00000000 ; compara flag com 0 
 	brne baixo ;se flag /= 0 vai para
-;	rjmp cima  ; seta 1 no pind6
-	;nop
-;cima:
-;sbi PORTD,6 ; seta 1 no pind6
 	out PORTC,pin40khz
 	ldi flag40khz,0b00000001 ; levanta flag 40khz
 	sei
-	INC sum40
-	;add sum40,flag40khz
 	rjmp loop
+	
 baixo:
-
-	;cbi PORTD,6 ; se nao, seta 0 no pind6
-	;out POTRC,
 	ldi flag40khz,0b00000000 ; zerra flag 40khz
 	out PORTC,flag40khz
 	sei
 	;RET
 	rjmp loop
-;fim40khz:
-	;cbi PORTD,6
-	
-;	ldi flag40khz,0b00000000
-;	out PORTC,flag40khz
-	;ldi temp,0b00000000    ;configura TCC0B    clk off			 pg 107
-	;sts TCCR0B,temp
-;	sei
-	;RET
-;	rjmp loop
+
 
 ;/////////////////////////////////////////////// TIMER EXTRA //////////////////////////
 
 timer1_ovf:
-	;cli
 	INC time3
 	sei
 	rjmp loop
@@ -383,24 +300,18 @@ timer1_ovf:
 int1_calc:
 	cli
 	inc temp2
-	cpi temp2, 0b00000101 
-	BRMI loop ; se > 5
+	cpi temp2, 0b00000111 
+	BRMI loop ; se > 7
  
 	
-	ldi temp,0b10000001 ; pausar timer 0 e 1
+	ldi temp,0b10000011 ; pausar timer 0 e 1
 	out GTCCR,temp
-
+	
 	lds time1,TCNT1L    ; guarda valores de tempo
 	lds time2,TCNT1H 
-	;ldi temp,0b00000000    
-	;sts TCCR1B,temp ;configura TCC1B    clk off	
-	;out TCCR0B,temp ;configura TCC0B    clk off	 
 
 	ldi temp,0b00000000 ;desativa int1
 	out EIMSK,temp
-
-  
-	;inc time1
 	
 	out PORTC,temp ;  seta 0 no pind2
 	ldi flag40khz,0b00000000 ; zerra flag 40khz
@@ -417,13 +328,10 @@ int1_calc:
 	sts UCSR0B, temp
 	sbi PORTD,2 ; configura max485 para enviar dados	
 	sei
-	
-	;ldi time1,0b01000110
-	;ldi time2,0b01000111
-	;ldi time3,0b01001000
+
 	rjmp TXdir
 
-; comando de direcao 
+; comando de direcao para debug
 TXdir:
 	lds temp, UCSR0A 
 	sbrs temp, UDRE0
@@ -436,9 +344,6 @@ TXdirfim:
 	ldi temp,0b01100000;TX fim
 	sts UCSR0A, temp
 	
-	
-	
-	;rjmp erro
 ; tempo 
 TXtime1:
 	lds temp, UCSR0A 
@@ -474,6 +379,14 @@ TXtime3:
 	
 	
 comfim: ; fim da comunicação
+
+	ldi temp,0b00000000 ; reseta timer 0 e 1
+	out TCNT0,temp		;|
+	sts TCNT1L,temp     ; -->zerar o tempo									
+	sts TCNT1H,temp		;|
+	ldi time3,0b00000000
+
+
 	lds temp, UCSR0A 
 	sbrs temp,TXC0
 	rjmp comfim
