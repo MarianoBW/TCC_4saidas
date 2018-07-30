@@ -76,7 +76,7 @@ start:
 	sts TCCR1A,temp        ;configura TCCR1A    normal mode
 	ldi temp,0b00000001    ;configura TCCR1B    clk/1
 	sts TCCR1B,temp
-	ldi temp,0b00000001    ;liga timer1 ovf
+	ldi temp,0b00000001    ;timer1 ovf on
 	sts TIMSK1,temp
 
 	;interrupção externa
@@ -95,6 +95,7 @@ start:
 	ldi dir,0b00000000
 	ldi flag40khz,0b00000000    ; flag 40khz
 	ldi pin40khz,0b00000000
+	ldi temp2,0b00000000
 	
 	out PORTB,temp
 	out PORTC,temp
@@ -181,7 +182,7 @@ DIR1:
 	sts TCNT1H,temp		;|
 	ldi time3,0b00000000
 
-	ldi sum40, 0b00000000 ;zera contador de pulsos 
+	;ldi sum40, 0b00000000 ;zera contador de pulsos 
 	
 	out GTCCR,temp
 
@@ -197,9 +198,7 @@ DIR2:
 	
 	ldi pin40khz,0b00000010  ; saida T2
 	
-	; ativa int1
-	ldi temp,0b00000010 
-	out EIMSK,temp 
+
 	
 	ldi temp,0b00000000 ; reseta timer 0 e 1
 	out TCNT0,temp		;|
@@ -207,7 +206,7 @@ DIR2:
 	sts TCNT1H,temp		;|
 	ldi time3,0b00000000
 	
-	ldi sum40, 0b00000000 ;zera contador de pulsos 
+	;ldi sum40, 0b00000000 ;zera contador de pulsos 
 	
 	out GTCCR,temp
 	
@@ -215,6 +214,12 @@ DIR2:
 ;	cbi PORTD,6 ; entrada T3
 ;	cbi PORTD,7 ; entrada T2
 ;	cbi PORTB,0 ; entrada T1 
+
+	; ativa int1
+	ldi temp,0b00000010 
+	out EIMSK,temp 
+
+
 	sei
 	rjmp loop
 
@@ -222,9 +227,7 @@ DIR3:
 	
 	ldi pin40khz,0b00000100  ; saida T3
 	
-	; ativa int1
-	ldi temp,0b00000010 
-	out EIMSK,temp 
+
 
 	ldi temp,0b00000000 ; reseta timer 0 e 1
 	out TCNT0,temp		;|
@@ -237,6 +240,11 @@ DIR3:
 ;	cbi PORTD,6 ; entrada T3
 ;	cbi PORTD,7 ; entrada T2
 	sbi PORTB,0 ; entrada T1 on
+	
+	; ativa int1
+	ldi temp,0b00000010 
+	out EIMSK,temp 	
+	
 	sei
 	rjmp loop
 
@@ -244,9 +252,7 @@ DIR4:
 
 	ldi pin40khz,0b00001000  ; saida T4
 	
-	; ativa int1
-	ldi temp,0b00000010 
-	out EIMSK,temp 
+
 	
 	ldi temp,0b00000000 ; reseta timer 0 e 1
 	out TCNT0,temp		;|
@@ -255,11 +261,17 @@ DIR4:
 	ldi time3,0b00000000
 	out GTCCR,temp
 
+	; ativa int1
+	ldi temp,0b00000010 
+	out EIMSK,temp 
 
 ;	cbi PORTD,5 ; entrada T4
 ;	cbi PORTD,6 ; entrada T3
 	sbi PORTD,7 ; entrada T2 on
 ;	cbi PORTB,0 ; entrada T1
+
+
+
 	sei
 	rjmp loop
 
@@ -293,6 +305,7 @@ baixo:
 timer1_ovf:
 	INC time3
 	sei
+	;ret
 	rjmp loop
 	
 ;////////////////////////////////////////////// AQUISICAO DE DADOS ///////////////////////////
@@ -300,18 +313,21 @@ timer1_ovf:
 int1_calc:
 	cli
 	inc temp2
-	cpi temp2, 0b00000111 
-	BRMI loop ; se > 7
+	cpi temp2, 0b00000101 
+	BRMI loop ; se > 5
  
+	ldi temp,0b00000000 ;desativa int1
+	out EIMSK,temp
 	
 	ldi temp,0b10000011 ; pausar timer 0 e 1
 	out GTCCR,temp
 	
+	
+	
 	lds time1,TCNT1L    ; guarda valores de tempo
 	lds time2,TCNT1H 
 
-	ldi temp,0b00000000 ;desativa int1
-	out EIMSK,temp
+
 	
 	out PORTC,temp ;  seta 0 no pind2
 	ldi flag40khz,0b00000000 ; zerra flag 40khz
@@ -356,7 +372,7 @@ TX1fim:
 	rjmp TX1fim
 	ldi temp,0b01100000;TX fim
 	sts UCSR0A, temp
-
+	
 TXtime2:
 	lds temp, UCSR0A 
 	sbrs temp, UDRE0
@@ -369,12 +385,12 @@ TX2fim:
 	ldi temp,0b01100000;TX fim
 	sts UCSR0A, temp
 
-TXtime3:
-	lds temp, UCSR0A 
-	sbrs temp, UDRE0
-	rjmp TXtime3
+ TXtime3:
+ 	lds temp, UCSR0A 
+ 	sbrs temp, UDRE0
+ 	rjmp TXtime3
     sts UDR0, time3
-
+	
 	rjmp comfim
 	
 	
@@ -384,8 +400,8 @@ comfim: ; fim da comunicação
 	out TCNT0,temp		;|
 	sts TCNT1L,temp     ; -->zerar o tempo									
 	sts TCNT1H,temp		;|
+	ldi temp2,0b00000000
 	ldi time3,0b00000000
-
 
 	lds temp, UCSR0A 
 	sbrs temp,TXC0
@@ -394,5 +410,5 @@ comfim: ; fim da comunicação
 	sts UCSR0A, temp
 	ldi temp,0b00010000; RX on
 	sts UCSR0B, temp
-	rjmp RX
+	rjmp start ;RX
 
