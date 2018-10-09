@@ -17,16 +17,16 @@ comport = serial.Serial('/dev/ttyUSB0', 9600)
 tempo1=0
 tempo2=0
 tempo3=0
-tempod1=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+tempod1=[0,0,0,0,0,0,0,0,0,0]
 i=0
 tempod21=0
-tempod2=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+tempod2=[0,0,0,0,0,0,0,0,0,0]
 tempod12=0
 x=1
  #------------------------------------------------------------
 while x==1:
     i=0
-    while i<15:
+    while i<10:
         time.sleep(0.1)
         PARAM_ASCII='3'
         comport.write(PARAM_ASCII)
@@ -41,11 +41,9 @@ while x==1:
             tempo3=ord(tempo3)
             
             
-            
-            tempod1p=((tempo1+256*tempo2+256*256*tempo3)) #119+256*119+256*256*119
+            #119+256*119+256*256*119
+            tempod1p=((tempo1+256*tempo2+256*256*tempo3)) 
             tempod1[i]=float(tempod1p/20000000.0)
-         #119+256*119+256*256*119
-    #    tempod11=tempod1[i]+tempod11
 #            print '\ntempod1 =%s '%(tempod1[i])
 #            print '\ntempo3 =%s '%(tempo3)
 #            print '\ntempo2 =%s '%(tempo2)
@@ -58,7 +56,7 @@ while x==1:
     
     
     i=0
-    while i<15:
+    while i<10:
         time.sleep(0.1)
         PARAM_ASCII='1'
         comport.write(PARAM_ASCII)
@@ -74,11 +72,11 @@ while x==1:
             #print '\ntempo1 =%s '%(tempo1)
             #print '\ntempo2 =%s '%(tempo2)
             #print '\ntempo3 =%s '%(tempo3)
-            tempod2p=((tempo1+256*tempo2+256*256*tempo3)) #119+256*119+256*256*119
+            #119+256*119+256*256*119
+            tempod2p=((tempo1+256*tempo2+256*256*tempo3)) 
             tempod2[i]=float(tempod2p/20000000.0)
 #            print '\ntempod2 =%s '%(tempod2[i])
 #            print '\ntempod2 =%s '%(tempod2p)
-    #    tempod12=tempod2[i]+tempod12
 #            print '\ntempo3 =%s '%(tempo3)
 #            print '\ntempo2 =%s '%(tempo2)
 #            print '\ntempo1 =%s '%(tempo1)
